@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Text Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input[type="file"] {
+            margin: 20px;
+        }
+        img {
+            max-width: 300px;
+            margin-top: 20px;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+    <form id="uploadForm">
+        <input type="file" id="imageInput" name="image" accept="image/*">
+        <button type="submit">Predict</button>
+    </form>
+    <div id="output">
+        <img id="uploadedImage" src="" alt="Uploaded Image">
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const imageInput = document.getElementById('imageInput');
+            if (imageInput.files.length === 0) {
+                alert("Please select an image to upload");
+                return;
+            }
+            formData.append('image', imageInput.files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                document.getElementById('uploadedImage').src = URL.createObjectURL(imageInput.files[0]);
+                document.getElementById('result').innerHTML = `
+                    <h3>Prediction: ${data.predicted_label}</h3>
+                    <p>Extracted Text: ${data.extracted_text}</p>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while processing the image.');
+            }
+        });
+    </script>
+</body>
+</html>
